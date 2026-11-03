@@ -513,18 +513,16 @@ class NDArithmeticMixin:
             ``handle_mask`` must create (and copy) the returned mask.
         """
         # If only one mask is present we need not bother about any type checks
-        if (
-            self.mask is None and operand is not None and operand.mask is None
-        ) or handle_mask is None:
+        if (self.mask is None and (operand is None or operand.mask is None)) or handle_mask is None:
             return None
-        elif self.mask is None and operand is not None:
-            # Make a copy so there is no reference in the result.
-            return deepcopy(operand.mask)
-        elif operand is None:
+        # If only self has a mask, copy it
+        if self.mask is not None and (operand is None or operand.mask is None):
             return deepcopy(self.mask)
-        else:
-            # Now lets calculate the resulting mask (operation enforces copy)
-            return handle_mask(self.mask, operand.mask, **kwds)
+        # If only operand has a mask, copy it
+        if self.mask is None and operand is not None and operand.mask is not None:
+            return deepcopy(operand.mask)
+        # Both have masks: combine using the provided handler
+        return handle_mask(self.mask, operand.mask, **kwds)
 
     def _arithmetic_wcs(self, operation, operand, compare_wcs, **kwds):
         """
