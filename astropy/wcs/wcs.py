@@ -1218,6 +1218,11 @@ reduce these to 2 dimensions using the naxis kwarg.
                 raise ValueError(
                     "Coordinate arrays are not broadcastable to each other")
 
+            # If the input arrays are empty, return empty outputs without calling wcslib
+            if axes[0].size == 0:
+                # Return a list of empty arrays, one for each world coordinate axis
+                return [np.empty_like(axes[0]) for _ in range(self.naxis)]
+
             xy = np.hstack([x.reshape((x.size, 1)) for x in axes])
 
             if ra_dec_order and sky == 'input':
