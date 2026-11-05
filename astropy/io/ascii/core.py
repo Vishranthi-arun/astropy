@@ -1803,6 +1803,8 @@ def _get_writer(Writer, fast_writer, **kwargs):
     # i.e. fill_values=None is the same as not providing it at all.
     if "fill_values" in kwargs and kwargs["fill_values"] is None:
         del kwargs["fill_values"]
+    # Extract header_rows if provided; it is not a standard writer kwarg
+    header_rows = kwargs.pop("header_rows", None)
 
     if issubclass(Writer, FastBasic):  # Fast writers handle args separately
         return Writer(**kwargs)
@@ -1813,6 +1815,8 @@ def _get_writer(Writer, fast_writer, **kwargs):
 
     writer_kwargs = {k: v for k, v in kwargs.items() if k not in extra_writer_pars}
     writer = Writer(**writer_kwargs)
+    if header_rows is not None:
+        setattr(writer, "header_rows", header_rows)
 
     if "delimiter" in kwargs:
         writer.header.splitter.delimiter = kwargs["delimiter"]
